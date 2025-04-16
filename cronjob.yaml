@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cron-job-sample
+spec:
+  schedule: "* * * * *"  # Cron job schedule to run every minute
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: cron-container
+              image: php:8.4-cli  # Use PHP 8.4 image
+              command:
+                - "sh"
+                - "-c"
+                - |
+                  php /var/www/html/public/cron/queue_pdf_new.php
+                  php /var/www/html/public/cron/queue_pdf_json.php
+                  php /var/www/html/public/cron/signature/script
+                  php /var/www/html/artisan schedule:run >> /dev/null 2>&1
+                  php /var/www/html/public/cron/email_cron_by_webservice.php
+          restartPolicy: OnFailure
